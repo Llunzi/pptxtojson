@@ -20,7 +20,7 @@ export async function parse(file) {
 
   const filesInfo = await getContentTypes(zip)
   const { width, height, defaultTextStyle } = await getSlideInfo(zip)
-  const { themeContent, themeColors } = await getTheme(zip)
+  const { themeContent, themeColors, themeColorsObj } = await getTheme(zip)
 
   for (const filename of filesInfo.slides) {
     const singleSlide = await processSingleSlide(zip, filename, themeContent, defaultTextStyle)
@@ -30,6 +30,7 @@ export async function parse(file) {
   return {
     slides,
     themeColors,
+    themeColorsObj, 
     size: {
       width,
       height,
@@ -100,16 +101,38 @@ async function getTheme(zip) {
   const themeContent = await readXmlFile(zip, 'ppt/' + themeURI)
 
   const themeColors = []
+  const themeColorsObj = {}
   const clrScheme = getTextByPathList(themeContent, ['a:theme', 'a:themeElements', 'a:clrScheme'])
   if (clrScheme) {
     for (let i = 1; i <= 6; i++) {
       if (clrScheme[`a:accent${i}`] === undefined) break
       const color = getTextByPathList(clrScheme, [`a:accent${i}`, 'a:srgbClr', 'attrs', 'val'])
-      if (color) themeColors.push('#' + color)
+      if (color) {
+        themeColors.push('#' + color)
+        themeColorsObj[`accent${i}`] = '#' + color
+      }
+    }
+
+    // 补充暗色系颜色
+    for (let i = 1; i <= 2; i++) {
+      if (clrScheme[`a:dk${i}`] === undefined) break
+      const color = getTextByPathList(clrScheme, [`a:dk${i}`, 'a:srgbClr', 'attrs', 'val'])
+      if (color) {
+        themeColorsObj[`dk${i}`] = '#' + color
+      }
+    }
+
+    // 补充亮色系颜色
+    for (let i = 1; i <= 2; i++) {
+      if (clrScheme[`a:lt${i}`] === undefined) break
+      const color = getTextByPathList(clrScheme, [`a:lt${i}`, 'a:srgbClr', 'attrs', 'val'])
+      if (color) {
+        themeColorsObj[`lt${i}`] = '#' + color
+      }
     }
   }
 
-  return { themeContent, themeColors }
+  return { themeContent, themeColors, themeColorsObj }
 }
 
 async function processSingleSlide(zip, sldFileName, themeContent, defaultTextStyle) {
