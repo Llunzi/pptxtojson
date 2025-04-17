@@ -10,7 +10,7 @@ import { getCustomShapePath } from './shape'
 import { extractFileExtension, base64ArrayBuffer, getTextByPathList, angleToDegrees, getMimeType, isVideoLink, escapeHtml, hasValidText } from './utils'
 import { getShadow } from './shadow'
 import { getTableBorders, getTableCellParams, getTableRowParams } from './table'
-import { RATIO_EMUs_Points } from './constants'
+import { RATIO_EMUs_Points, RATIO_EMUs_LineHeight } from './constants'
 import { findOMath, latexFormart, parseOMath } from './math'
 
 export async function parse(file) {
@@ -26,6 +26,8 @@ export async function parse(file) {
     const singleSlide = await processSingleSlide(zip, filename, themeContent, defaultTextStyle)
     slides.push(singleSlide)
   }
+
+  console.log('slides = ', slides)
 
   return {
     slides,
@@ -345,8 +347,8 @@ async function getLayoutElements(warpObj) {
       else {
         const ph = getTextByPathList(nodesSldLayout[nodeKey], ['p:nvSpPr', 'p:nvPr', 'p:ph'])
         if (!ph) {
-          const ret = await processNodesInSlide(nodeKey, nodesSldLayout[nodeKey], nodesSldLayout, warpObj, 'slideLayoutBg')
-          if (ret) elements.push(ret)
+        const ret = await processNodesInSlide(nodeKey, nodesSldLayout[nodeKey], nodesSldLayout, warpObj, 'slideLayoutBg')
+        if (ret) elements.push(ret)
         }
       }
     }
@@ -614,6 +616,9 @@ async function genShape(node, pNode, slideLayoutSpNode, slideMasterSpNode, name,
   const vAlign = getVerticalAlign(node, slideLayoutSpNode, slideMasterSpNode, type)
   const isVertical = getTextByPathList(node, ['p:txBody', 'a:bodyPr', 'attrs', 'vert']) === 'eaVert'
 
+  const originalLineHeight = getTextByPathList(node, ['p:txBody', 'a:p', 'a:pPr', 'a:lnSpc', 'a:spcPct', 'attrs', 'val'])
+  const lineHeight = parseInt(originalLineHeight) * RATIO_EMUs_LineHeight
+
   const data = {
     left,
     top,
@@ -631,6 +636,7 @@ async function genShape(node, pNode, slideLayoutSpNode, slideMasterSpNode, name,
     vAlign,
     name,
     order,
+    lineHeight,
   }
 
   if (shadow) data.shadow = shadow
@@ -645,7 +651,7 @@ async function genShape(node, pNode, slideLayoutSpNode, slideMasterSpNode, name,
     return {
       ...data,
       type: 'shape',
-      shapType: 'custom',
+      shapType: shapType || 'custom', 
       path: d,
     }
   }
