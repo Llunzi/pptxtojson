@@ -71,6 +71,33 @@ export async function getPicFill(type, node, warpObj) {
   return img
 }
 
+export function getPicFillIsStretch(node) {
+  const aStretchNode = node['a:stretch']
+  const fillNode = getTextByPathList(aStretchNode, ['a:fillRect', 'attrs'])
+
+  if (!fillNode) return undefined
+
+  const { l: l1, t: t1, r: r1, b: b1 } = fillNode
+
+  const l = l1 / 100000
+  const t = t1 / 100000
+  const r = r1 / 100000
+  const b = b1 / 100000
+
+  const x = l
+  const y = t
+  const width = 1 - l - r
+  const height = 1 - t - b
+
+
+  return {
+    x, 
+    y,
+    width,
+    height,
+  }
+}
+
 export function getPicFillOpacity(node) {
   const aBlipNode = node['a:blip']
 
@@ -479,10 +506,12 @@ export async function getShapeFill(node, pNode, isSvgMode, warpObj, source) {
   else if (fillType === 'PIC_FILL') {
     const shpFill = node['p:spPr']['a:blipFill']
     const picBase64 = await getPicFill(source, shpFill, warpObj)
+    const fillRect = getPicFillIsStretch(shpFill)
     const opacity = getPicFillOpacity(shpFill)
     fillValue = {
       picBase64,
       opacity,
+      fillRect,
     }
     type = 'image'
   }

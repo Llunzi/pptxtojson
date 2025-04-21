@@ -347,8 +347,8 @@ async function getLayoutElements(warpObj) {
       else {
         const ph = getTextByPathList(nodesSldLayout[nodeKey], ['p:nvSpPr', 'p:nvPr', 'p:ph'])
         if (!ph) {
-        const ret = await processNodesInSlide(nodeKey, nodesSldLayout[nodeKey], nodesSldLayout, warpObj, 'slideLayoutBg')
-        if (ret) elements.push(ret)
+          const ret = await processNodesInSlide(nodeKey, nodesSldLayout[nodeKey], nodesSldLayout, warpObj, 'slideLayoutBg')
+          if (ret) elements.push(ret)
         }
       }
     }
@@ -617,7 +617,7 @@ async function genShape(node, pNode, slideLayoutSpNode, slideMasterSpNode, name,
   const isVertical = getTextByPathList(node, ['p:txBody', 'a:bodyPr', 'attrs', 'vert']) === 'eaVert'
 
   const originalLineHeight = getTextByPathList(node, ['p:txBody', 'a:p', 'a:pPr', 'a:lnSpc', 'a:spcPct', 'attrs', 'val'])
-  const lineHeight = parseInt(originalLineHeight) * RATIO_EMUs_LineHeight
+  const lineHeight = parseInt(originalLineHeight) * RATIO_EMUs_LineHeight || 1
 
   const data = {
     left,
