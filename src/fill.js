@@ -18,6 +18,7 @@ import {
   escapeHtml,
   getMimeType,
   toHex,
+  toFixed,
 } from './utils'
 
 export function getFillType(node) {
@@ -79,22 +80,24 @@ export function getPicFillIsStretch(node) {
 
   const { l: l1, t: t1, r: r1, b: b1 } = fillNode
 
-  const l = l1 / 100000
-  const t = t1 / 100000
-  const r = r1 / 100000
-  const b = b1 / 100000
+  if (!l1 && !t1 && !r1 && !b1) return { isStretch: true }
+
+  const l = l1 / 100000 || 0
+  const t = t1 / 100000 || 0
+  const r = r1 / 100000 || 0
+  const b = b1 / 100000 || 0
 
   const x = l
   const y = t
   const width = 1 - l - r
   const height = 1 - t - b
 
-
   return {
     x, 
     y,
     width,
     height,
+    isClip: width === 1 || height === 1,
   }
 }
 
@@ -104,7 +107,7 @@ export function getPicFillOpacity(node) {
   const aphaModFixNode = getTextByPathList(aBlipNode, ['a:alphaModFix', 'attrs'])
   let opacity = 1
   if (aphaModFixNode && aphaModFixNode['amt'] && aphaModFixNode['amt'] !== '') {
-    opacity = parseInt(aphaModFixNode['amt']) / 100000
+    opacity = toFixed(parseInt(aphaModFixNode['amt']) / 100000)
   }
 
   return opacity

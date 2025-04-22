@@ -158,3 +158,7 @@ export function hasValidText(htmlString) {
   const text = doc.body.textContent || doc.body.innerText
   return text.trim() !== ''
 }
+
+export function toFixed(num, precision = 2) {
+  return parseFloat(num.toFixed(precision))
+}
