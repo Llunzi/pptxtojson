@@ -112,7 +112,7 @@ export function genSpanElement(node, pNode, textBodyNode, pFontStyle, slideLayou
   if (typeof text !== 'string') text = '&nbsp;'
 
   let styleText = ''
-  const fontColor = getFontColor(node, pNode, lstStyle, pFontStyle, lvl, warpObj)
+  const {color: fontColor, themeType} = getFontColor(node, pNode, lstStyle, pFontStyle, lvl, warpObj)
   const fontSize = getFontSize(node, slideLayoutSpNode, type, slideMasterTextStyles)
   const fontType = getFontType(node, type, warpObj)
   const fontBold = getFontBold(node)
@@ -124,6 +124,7 @@ export function genSpanElement(node, pNode, textBodyNode, pFontStyle, slideLayou
   const subscript = getFontSubscript(node)
 
   if (fontColor) styleText += `color: ${fontColor};`
+  if (themeType) styleText += `color-theme: ${themeType};`
   if (fontSize) styleText += `font-size: ${fontSize};`
   if (fontType) styleText += `font-family: ${fontType};`
   if (fontBold) styleText += `font-weight: ${fontBold};`

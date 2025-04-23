@@ -24,12 +24,14 @@ export function getFontType(node, type, warpObj) {
 
 export function getFontColor(node, pNode, lstStyle, pFontStyle, lvl, warpObj) {
   const rPrNode = getTextByPathList(node, ['a:rPr'])
-  let filTyp, color
+  let filTyp, color, themeType
   if (rPrNode) {
     filTyp = getFillType(rPrNode)
     if (filTyp === 'SOLID_FILL') {
       const solidFillNode = rPrNode['a:solidFill']
-      color = getSolidFill(solidFillNode, undefined, undefined, warpObj)
+      const { color: colorVal, schemeVal: themeTypeVal } = getSolidFill(solidFillNode, undefined, undefined, warpObj)
+      color = colorVal
+      themeType = themeTypeVal
     }
   }
   if (!color && getTextByPathList(lstStyle, ['a:lvl' + lvl + 'pPr', 'a:defRPr'])) {
@@ -37,15 +39,20 @@ export function getFontColor(node, pNode, lstStyle, pFontStyle, lvl, warpObj) {
     filTyp = getFillType(lstStyledefRPr)
     if (filTyp === 'SOLID_FILL') {
       const solidFillNode = lstStyledefRPr['a:solidFill']
-      color = getSolidFill(solidFillNode, undefined, undefined, warpObj)
+      const { color: colorVal, schemeVal: themeTypeVal } = getSolidFill(solidFillNode, undefined, undefined, warpObj)
+      color = colorVal
+      themeType = themeTypeVal
     }
   }
   if (!color) {
     const sPstyle = getTextByPathList(pNode, ['p:style', 'a:fontRef'])
-    if (sPstyle) color = getSolidFill(sPstyle, undefined, undefined, warpObj)
-    if (!color && pFontStyle) color = getSolidFill(pFontStyle, undefined, undefined, warpObj)
+    if (sPstyle) ({color, schemeVal: themeType} = getSolidFill(sPstyle, undefined, undefined, warpObj))
+    if (!color && pFontStyle) ({color, schemeVal: themeType} = getSolidFill(pFontStyle, undefined, undefined, warpObj))
   }
-  return color || ''
+  return {
+    color: color || '',
+    themeType
+  }
 }
 
 export function getFontSize(node, slideLayoutSpNode, type, slideMasterTextStyles) {
@@ -115,9 +122,10 @@ export function getFontShadow(node, warpObj) {
   if (txtShadow) {
     const shadow = getShadow(txtShadow, warpObj)
     if (shadow) {
-      const { h, v, blur, color } = shadow
+      const { h, v, blur, color, themeType } = shadow
+      // const { h, v, blur, color } = shadow
       if (!isNaN(v) && !isNaN(h)) {
-        return h + 'pt ' + v + 'pt ' + (blur ? blur + 'pt' : '') + ' ' + color
+        return h + 'pt ' + v + 'pt ' + (blur ? blur + 'pt' : '') + ' ' + color + (themeType ? ' ' + themeType : '')
       }
     }
   }

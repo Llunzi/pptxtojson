@@ -2,7 +2,7 @@ import { getSolidFill } from './fill'
 import { RATIO_EMUs_Points } from './constants'
 
 export function getShadow(node, warpObj) {
-  const chdwClrNode = getSolidFill(node, undefined, undefined, warpObj)
+  const {color: chdwClrNode, schemeVal: themeType} = getSolidFill(node, undefined, undefined, warpObj)
   const outerShdwAttrs = node['attrs']
   const dir = outerShdwAttrs['dir'] ? (parseInt(outerShdwAttrs['dir']) / 60000) : 0
   const dist = parseInt(outerShdwAttrs['dist']) * RATIO_EMUs_Points
@@ -15,5 +15,6 @@ export function getShadow(node, warpObj) {
     v: vx,
     blur: blurRad,
     color: chdwClrNode,
+    themeType
   }
 }

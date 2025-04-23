@@ -49,7 +49,9 @@ export async function getTableCellParams(tcNode, thisTblStyle, cellSource, warpO
   const vMerge = getTextByPathList(tcNode, ['attrs', 'vMerge'])
   const hMerge = getTextByPathList(tcNode, ['attrs', 'hMerge'])
   let fillColor
+  let fillThemeType
   let fontColor
+  let fontThemeType
   let fontBold
 
   const getCelFill = getTextByPathList(tcNode, ['a:tcPr'])
@@ -59,20 +61,21 @@ export async function getTableCellParams(tcNode, thisTblStyle, cellSource, warpO
 
     if (fill && fill.type === 'color' && fill.value) {
       fillColor = fill.value 
+      fillThemeType = fill.themeType
     }
   }
   if (!fillColor) {
     let bgFillschemeClr
     if (cellSource) bgFillschemeClr = getTextByPathList(thisTblStyle, [cellSource, 'a:tcStyle', 'a:fill', 'a:solidFill'])
     if (bgFillschemeClr) {
-      fillColor = getSolidFill(bgFillschemeClr, undefined, undefined, warpObj)
+      ({color: fillColor, schemeVal: fillThemeType} = getSolidFill(bgFillschemeClr, undefined, undefined, warpObj))
     }
   }
 
   let rowTxtStyl
   if (cellSource) rowTxtStyl = getTextByPathList(thisTblStyle, [cellSource, 'a:tcTxStyle'])
   if (rowTxtStyl) {
-    fontColor = getSolidFill(rowTxtStyl, undefined, undefined, warpObj)
+    ({color: fontColor, schemeVal: fontThemeType} = getSolidFill(rowTxtStyl, undefined, undefined, warpObj))
     if (getTextByPathList(rowTxtStyl, ['attrs', 'b']) === 'on') fontBold = true
   }
 
@@ -105,7 +108,9 @@ export async function getTableCellParams(tcNode, thisTblStyle, cellSource, warpO
 
   return {
     fillColor,
+    fillThemeType,
     fontColor,
+    fontThemeType,
     fontBold,
     borders,
     rowSpan: rowSpan ? +rowSpan : undefined,
@@ -119,30 +124,44 @@ export function getTableRowParams(trNodes, i, tblStylAttrObj, thisTblStyle, warp
   let fillColor
   let fontColor
   let fontBold
+  let fillThemeType
+  let fontThemeType
 
   if (thisTblStyle && thisTblStyle['a:wholeTbl']) {
     const bgFillschemeClr = getTextByPathList(thisTblStyle, ['a:wholeTbl', 'a:tcStyle', 'a:fill', 'a:solidFill'])
     if (bgFillschemeClr) {
-      const local_fillColor = getSolidFill(bgFillschemeClr, undefined, undefined, warpObj)
-      if (local_fillColor) fillColor = local_fillColor
+      const {color: local_fillColor, schemeVal: themeTypeVal} = getSolidFill(bgFillschemeClr, undefined, undefined, warpObj)
+      if (local_fillColor) {
+        fillColor = local_fillColor
+        fillThemeType = themeTypeVal
+      }
     }
     const rowTxtStyl = getTextByPathList(thisTblStyle, ['a:wholeTbl', 'a:tcTxStyle'])
     if (rowTxtStyl) {
-      const local_fontColor = getSolidFill(rowTxtStyl, undefined, undefined, warpObj)
-      if (local_fontColor) fontColor = local_fontColor
+      const {color: local_fontColor, schemeVal: themeTypeVal} = getSolidFill(rowTxtStyl, undefined, undefined, warpObj)
+      if (local_fontColor) {
+        fontColor = local_fontColor
+        fontThemeType = themeTypeVal
+      }
       if (getTextByPathList(rowTxtStyl, ['attrs', 'b']) === 'on') fontBold = true
     }
   }
   if (i === 0 && tblStylAttrObj['isFrstRowAttr'] === 1 && thisTblStyle) {
     const bgFillschemeClr = getTextByPathList(thisTblStyle, ['a:firstRow', 'a:tcStyle', 'a:fill', 'a:solidFill'])
     if (bgFillschemeClr) {
-      const local_fillColor = getSolidFill(bgFillschemeClr, undefined, undefined, warpObj)
-      if (local_fillColor) fillColor = local_fillColor
+      const {color: local_fillColor, schemeVal: themeTypeVal} = getSolidFill(bgFillschemeClr, undefined, undefined, warpObj)
+      if (local_fillColor) {
+        fillColor = local_fillColor
+        fillThemeType = themeTypeVal
+      }
     }
     const rowTxtStyl = getTextByPathList(thisTblStyle, ['a:firstRow', 'a:tcTxStyle'])
     if (rowTxtStyl) {
-      const local_fontColor = getSolidFill(rowTxtStyl, undefined, undefined, warpObj)
-      if (local_fontColor) fontColor = local_fontColor
+      const {color: local_fontColor, schemeVal: themeTypeVal} = getSolidFill(rowTxtStyl, undefined, undefined, warpObj)
+      if (local_fontColor) {
+        fontColor = local_fontColor
+        fontThemeType = themeTypeVal
+      }
       if (getTextByPathList(rowTxtStyl, ['attrs', 'b']) === 'on') fontBold = true
     }
   }
@@ -151,26 +170,38 @@ export function getTableRowParams(trNodes, i, tblStylAttrObj, thisTblStyle, warp
     if ((i % 2) === 0 && thisTblStyle['a:band2H']) {
       const bgFillschemeClr = getTextByPathList(thisTblStyle, ['a:band2H', 'a:tcStyle', 'a:fill', 'a:solidFill'])
       if (bgFillschemeClr) {
-        const local_fillColor = getSolidFill(bgFillschemeClr, undefined, undefined, warpObj)
-        if (local_fillColor) fillColor = local_fillColor
+        const {color: local_fillColor, schemeVal: themeTypeVal} = getSolidFill(bgFillschemeClr, undefined, undefined, warpObj)
+        if (local_fillColor) {
+          fillColor = local_fillColor
+          fillThemeType = themeTypeVal
+        }
       }
       const rowTxtStyl = getTextByPathList(thisTblStyle, ['a:band2H', 'a:tcTxStyle'])
       if (rowTxtStyl) {
-        const local_fontColor = getSolidFill(rowTxtStyl, undefined, undefined, warpObj)
-        if (local_fontColor) fontColor = local_fontColor
+        const {color: local_fontColor, schemeVal: themeTypeVal} = getSolidFill(rowTxtStyl, undefined, undefined, warpObj)
+        if (local_fontColor) {
+          fontColor = local_fontColor
+          fontThemeType = themeTypeVal
+        }
       }
       if (getTextByPathList(rowTxtStyl, ['attrs', 'b']) === 'on') fontBold = true
     }
     if ((i % 2) !== 0 && thisTblStyle['a:band1H']) {
       const bgFillschemeClr = getTextByPathList(thisTblStyle, ['a:band1H', 'a:tcStyle', 'a:fill', 'a:solidFill'])
       if (bgFillschemeClr) {
-        const local_fillColor = getSolidFill(bgFillschemeClr, undefined, undefined, warpObj)
-        if (local_fillColor) fillColor = local_fillColor
+        const {color: local_fillColor, schemeVal: themeTypeVal} = getSolidFill(bgFillschemeClr, undefined, undefined, warpObj)
+        if (local_fillColor) {
+          fillColor = local_fillColor
+          fillThemeType = themeTypeVal  
+        }
       }
       const rowTxtStyl = getTextByPathList(thisTblStyle, ['a:band1H', 'a:tcTxStyle'])
       if (rowTxtStyl) {
-        const local_fontColor = getSolidFill(rowTxtStyl, undefined, undefined, warpObj)
-        if (local_fontColor) fontColor = local_fontColor
+        const {color: local_fontColor, schemeVal: themeTypeVal} = getSolidFill(rowTxtStyl, undefined, undefined, warpObj)
+        if (local_fontColor) {
+          fontColor = local_fontColor
+          fontThemeType = themeTypeVal
+        }
         if (getTextByPathList(rowTxtStyl, ['attrs', 'b']) === 'on') fontBold = true
       }
     }
@@ -178,15 +209,19 @@ export function getTableRowParams(trNodes, i, tblStylAttrObj, thisTblStyle, warp
   if (i === (trNodes.length - 1) && tblStylAttrObj['isLstRowAttr'] === 1 && thisTblStyle) {
     const bgFillschemeClr = getTextByPathList(thisTblStyle, ['a:lastRow', 'a:tcStyle', 'a:fill', 'a:solidFill'])
     if (bgFillschemeClr) {
-      const local_fillColor = getSolidFill(bgFillschemeClr, undefined, undefined, warpObj)
+      const {color: local_fillColor, schemeVal: themeTypeVal} = getSolidFill(bgFillschemeClr, undefined, undefined, warpObj)
       if (local_fillColor) {
         fillColor = local_fillColor
+        fillThemeType = themeTypeVal
       }
     }
     const rowTxtStyl = getTextByPathList(thisTblStyle, ['a:lastRow', 'a:tcTxStyle'])
     if (rowTxtStyl) {
-      const local_fontColor = getSolidFill(rowTxtStyl, undefined, undefined, warpObj)
-      if (local_fontColor) fontColor = local_fontColor
+      const {color: local_fontColor, schemeVal: themeTypeVal} = getSolidFill(rowTxtStyl, undefined, undefined, warpObj)
+      if (local_fontColor) {
+        fontColor = local_fontColor
+        fontThemeType = themeTypeVal
+      }
       if (getTextByPathList(rowTxtStyl, ['attrs', 'b']) === 'on') fontBold = true
     }
   }
@@ -195,5 +230,7 @@ export function getTableRowParams(trNodes, i, tblStylAttrObj, thisTblStyle, warp
     fillColor,
     fontColor,
     fontBold,
+    fillThemeType,
+    fontThemeType,
   }
 }
