@@ -7,10 +7,10 @@ import { getVerticalAlign } from './align'
 import { getPosition, getSize } from './position'
 import { genTextBody } from './text'
 import { getCustomShapePath } from './shape'
-import { extractFileExtension, base64ArrayBuffer, getTextByPathList, angleToDegrees, getMimeType, isVideoLink, escapeHtml, hasValidText } from './utils'
+import { extractFileExtension, base64ArrayBuffer, getTextByPathList, angleToDegrees, getMimeType, isVideoLink, escapeHtml, hasValidText, getLineHeight } from './utils'
 import { getShadow } from './shadow'
 import { getTableBorders, getTableCellParams, getTableRowParams } from './table'
-import { RATIO_EMUs_Points, RATIO_EMUs_LineHeight } from './constants'
+import { RATIO_EMUs_Points } from './constants'
 import { findOMath, latexFormart, parseOMath } from './math'
 
 export async function parse(file) {
@@ -616,8 +616,7 @@ async function genShape(node, pNode, slideLayoutSpNode, slideMasterSpNode, name,
   const vAlign = getVerticalAlign(node, slideLayoutSpNode, slideMasterSpNode, type)
   const isVertical = getTextByPathList(node, ['p:txBody', 'a:bodyPr', 'attrs', 'vert']) === 'eaVert'
 
-  const originalLineHeight = getTextByPathList(node, ['p:txBody', 'a:p', 'a:pPr', 'a:lnSpc', 'a:spcPct', 'attrs', 'val'])
-  const lineHeight = parseInt(originalLineHeight) * RATIO_EMUs_LineHeight || 1
+  const lineHeight = getLineHeight(node)
 
   const data = {
     left,

@@ -1,5 +1,6 @@
 import { getHorizontalAlign } from './align'
 import { getTextByPathList } from './utils'
+export const RATIO_EMUs_LineHeight = 1 / 100000 // 1EMUs = 100000
 
 import {
   getFontType,
@@ -83,6 +84,7 @@ export function genTextBody(textBodyNode, spNode, slideLayoutSpNode, type, warpO
     if (listType) text += '</li>'
     else text += '</p>'
   }
+
   return text
 }
 
