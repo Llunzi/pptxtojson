@@ -12,6 +12,7 @@ import { getShadow } from './shadow'
 import { getTableBorders, getTableCellParams, getTableRowParams } from './table'
 import { RATIO_EMUs_Points } from './constants'
 import { findOMath, latexFormart, parseOMath } from './math'
+import { calculateFmla } from './fmla'
 
 export async function parse(file) {
   const slides = []
@@ -415,7 +416,9 @@ function indexNodes(content) {
   return { idTable, idxTable, typeTable }
 }
 
-async function processNodesInSlide(nodeKey, nodeValue, nodes, warpObj, source) {
+// pws: 宽度缩放比例
+// phs: 高度缩放比例
+async function processNodesInSlide(nodeKey, nodeValue, nodes, warpObj, source, pws = 1, phs = 1) {
   let json
 
   switch (nodeKey) {
@@ -432,7 +435,7 @@ async function processNodesInSlide(nodeKey, nodeValue, nodes, warpObj, source) {
       json = await processGraphicFrameNode(nodeValue, warpObj, source)
       break
     case 'p:grpSp':
-      json = await processGroupSpNode(nodeValue, warpObj, source)
+      json = await processGroupSpNode(nodeValue, warpObj, source, pws, phs)
       break
     case 'mc:AlternateContent':
       if (getTextByPathList(nodeValue, ['mc:Fallback', 'p:grpSpPr', 'a:xfrm'])) {
@@ -475,7 +478,8 @@ async function processMathNode(node, warpObj, source) {
   }
 }
 
-async function processGroupSpNode(node, warpObj, source) {
+// fix: 组嵌套组 缩放比计算错误问题 pws: 宽度缩放比例 phs: 高度缩放比例
+async function processGroupSpNode(node, warpObj, source, pws = 1, phs = 1) {
   const order = node['attrs']['order']
   const xfrmNode = getTextByPathList(node, ['p:grpSpPr', 'a:xfrm'])
   if (!xfrmNode) return null
@@ -495,19 +499,19 @@ async function processGroupSpNode(node, warpObj, source) {
   let rotate = getTextByPathList(xfrmNode, ['attrs', 'rot']) || 0
   if (rotate) rotate = angleToDegrees(rotate)
 
-  const ws = cx / chcx
-  const hs = cy / chcy
+  const ws = cx / chcx * pws || 1 
+  const hs = cy / chcy * phs || 1
 
   const elements = []
   for (const nodeKey in node) {
     if (node[nodeKey].constructor === Array) {
       for (const item of node[nodeKey]) {
-        const ret = await processNodesInSlide(nodeKey, item, node, warpObj, source)
+        const ret = await processNodesInSlide(nodeKey, item, node, warpObj, source, ws, hs)
         if (ret) elements.push(ret)
       }
     }
     else {
-      const ret = await processNodesInSlide(nodeKey, node[nodeKey], node, warpObj, source)
+      const ret = await processNodesInSlide(nodeKey, node[nodeKey], node, warpObj, source, ws, hs)
       if (ret) elements.push(ret)
     }
   }
@@ -614,7 +618,12 @@ async function genShape(node, pNode, slideLayoutSpNode, slideMasterSpNode, name,
   if (outerShdwNode) shadow = getShadow(outerShdwNode, warpObj)
 
   const vAlign = getVerticalAlign(node, slideLayoutSpNode, slideMasterSpNode, type)
+
   const isVertical = getTextByPathList(node, ['p:txBody', 'a:bodyPr', 'attrs', 'vert']) === 'eaVert'
+  const fmla = getTextByPathList(node, ['p:spPr', 'a:prstGeom', 'a:avLst', 'a:gd', 'attrs', 'fmla'])
+  
+  // TODO: 计算公式 缺少变量 需要补充
+  const fmlaVal = calculateFmla(fmla) / 100000
 
   const lineHeight = getLineHeight(node)
 
@@ -628,6 +637,7 @@ async function genShape(node, pNode, slideLayoutSpNode, slideMasterSpNode, name,
     borderType,
     borderStrokeDasharray: strokeDasharray,
     fill,
+    fmla: fmlaVal,
     content,
     isFlipV,
     isFlipH,

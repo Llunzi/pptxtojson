@@ -76,7 +76,7 @@ export function getLineHeight(node) {
   let _textLineHeightPt = undefined
   let _textLineHeightPercent = undefined
   if (spcPtsLineHeight) {
-    _textLineHeightPt = parseInt(spcPtsLineHeight) / 100
+    _textLineHeightPt = parseInt(spcPtsLineHeight) / 100 * 1.33 // 1.33 is the ratio of pt to px
   }
 
   if (spcPctLineHeight) {
@@ -88,7 +88,7 @@ export function getLineHeight(node) {
   } 
 
   if (_textLineHeightPt) {
-    return _textLineHeightPt + 'pt'
+    return _textLineHeightPt + 'px'
   }
 
   return 1
