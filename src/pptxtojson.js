@@ -889,13 +889,18 @@ async function genTable(node, warpObj) {
   if (tblBorderStyl) borders = getTableBorders(tblBorderStyl, warpObj)
 
   let tbl_bgcolor = ''
+  let tbl_bgcolorThemeType = ''
   let tbl_bgFillschemeClr = getTextByPathList(thisTblStyle, ['a:tblBg', 'a:fillRef'])
   if (tbl_bgFillschemeClr) {
-    tbl_bgcolor = getSolidFill(tbl_bgFillschemeClr, undefined, undefined, warpObj)
+    const {color: tbl_bgcolor_tmp, schemeVal: tbl_bgcolorThemeType_tmp} = getSolidFill(tbl_bgFillschemeClr, undefined, undefined, warpObj)
+    tbl_bgcolor = tbl_bgcolor_tmp
+    tbl_bgcolorThemeType = tbl_bgcolorThemeType_tmp
   }
   if (tbl_bgFillschemeClr === undefined) {
     tbl_bgFillschemeClr = getTextByPathList(thisTblStyle, ['a:wholeTbl', 'a:tcStyle', 'a:fill', 'a:solidFill'])
-    tbl_bgcolor = getSolidFill(tbl_bgFillschemeClr, undefined, undefined, warpObj)
+    const {color: tbl_bgcolor_tmp, schemeVal: tbl_bgcolorThemeType_tmp} = getSolidFill(tbl_bgFillschemeClr, undefined, undefined, warpObj)
+    tbl_bgcolor = tbl_bgcolor_tmp
+    tbl_bgcolorThemeType = tbl_bgcolorThemeType_tmp
   }
 
   let trNodes = tableNode['a:tr']
@@ -914,6 +919,8 @@ async function genTable(node, warpObj) {
       fillColor,
       fontColor,
       fontBold,
+      fontThemeType,  
+      fillThemeType,
     } = getTableRowParams(trNodes, i, tblStylAttrObj, thisTblStyle, warpObj)
 
     const tcNodes = trNode['a:tc']
@@ -965,8 +972,27 @@ async function genTable(node, warpObj) {
         if (cell.vMerge) td.vMerge = cell.vMerge
         if (cell.hMerge) td.hMerge = cell.hMerge
         if (cell.fontBold || fontBold) td.fontBold = cell.fontBold || fontBold
-        if (cell.fontColor || fontColor) td.fontColor = cell.fontColor || fontColor
-        if (cell.fillColor || fillColor || tbl_bgcolor) td.fillColor = cell.fillColor || fillColor || tbl_bgcolor
+        if (cell.fontColor) {
+          td.fontColor = cell.fontColor
+          td.fontColorThemeType = cell.fontThemeType
+        }
+        else if (fontColor) {
+          td.fontColor = fontColor
+          td.fontColorThemeType = fontThemeType
+        }
+        if (cell.fillColor) {
+          td.fillColor = cell.fillColor
+          td.fillColorThemeType = cell.fillThemeType
+        }
+        else if (fillColor) {
+          td.fillColor = fillColor
+          td.fillColorThemeType = fillThemeType
+        }
+        else if (tbl_bgcolor) {
+          td.fillColor = tbl_bgcolor
+          td.fillColorThemeType = tbl_bgcolorThemeType
+        }
+
         if (cell.borders) td.borders = cell.borders
 
         tr.push(td)
@@ -997,8 +1023,27 @@ async function genTable(node, warpObj) {
       if (cell.vMerge) td.vMerge = cell.vMerge
       if (cell.hMerge) td.hMerge = cell.hMerge
       if (cell.fontBold || fontBold) td.fontBold = cell.fontBold || fontBold
-      if (cell.fontColor || fontColor) td.fontColor = cell.fontColor || fontColor
-      if (cell.fillColor || fillColor || tbl_bgcolor) td.fillColor = cell.fillColor || fillColor || tbl_bgcolor
+      if (cell.fontColor) {
+        td.fontColor = cell.fontColor
+        td.fontColorThemeType = cell.fontThemeType
+      }
+      else if (fontColor) {
+        td.fontColor = fontColor
+        td.fontColorThemeType = fontThemeType
+      }
+      if (cell.fillColor) { 
+        td.fillColor = cell.fillColor
+        td.fillColorThemeType = cell.fillThemeType
+      }
+      else if (fillColor) {
+        td.fillColor = fillColor
+        td.fillColorThemeType = fillThemeType
+      }
+      else if (tbl_bgcolor) {
+        td.fillColor = tbl_bgcolor
+        td.fillColorThemeType = tbl_bgcolorThemeType
+      }
+
       if (cell.borders) td.borders = cell.borders
 
       tr.push(td)
