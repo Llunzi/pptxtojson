@@ -15,14 +15,19 @@ export function getBorder(node, elType, warpObj) {
 
   const isNoFill = getTextByPathList(lineNode, ['a:noFill'])
 
+  let borderColor = getTextByPathList(lineNode, ['a:solidFill', 'a:srgbClr', 'attrs', 'val'])
   let borderWidth = isNoFill ? 0 : (parseInt(getTextByPathList(lineNode, ['attrs', 'w'])) / 12700)
   if (isNaN(borderWidth)) {
     if (lineNode) borderWidth = 0
     else if (elType !== 'obj') borderWidth = 0
     else borderWidth = 1
+
+    // 如果边框颜色不为空，则边框宽度为1
+    if (!isNoFill && borderColor) {
+      borderWidth = 1
+    }
   }
 
-  let borderColor = getTextByPathList(lineNode, ['a:solidFill', 'a:srgbClr', 'attrs', 'val'])
   if (!borderColor) {
     const schemeClrNode = getTextByPathList(lineNode, ['a:solidFill', 'a:schemeClr'])
     const schemeClr = 'a:' + getTextByPathList(schemeClrNode, ['attrs', 'val'])

@@ -623,7 +623,7 @@ async function genShape(node, pNode, slideLayoutSpNode, slideMasterSpNode, name,
   const fmla = getTextByPathList(node, ['p:spPr', 'a:prstGeom', 'a:avLst', 'a:gd', 'attrs', 'fmla'])
   
   // TODO: 计算公式 缺少变量 需要补充
-  const fmlaVal = calculateFmla(fmla) / 100000
+  const fmlaVal = calculateFmla(fmla) / 100000 || undefined
 
   const lineHeight = getLineHeight(node)
 
