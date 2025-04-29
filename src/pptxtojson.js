@@ -1,7 +1,7 @@
 import JSZip from 'jszip'
 import { readXmlFile } from './readXmlFile'
 import { getBorder } from './border'
-import { getSlideBackgroundFill, getShapeFill, getSolidFill, getPicFill } from './fill'
+import { getSlideBackgroundFill, getShapeFill, getSolidFill, getPicFill, getPicFillOpacity } from './fill'
 import { getChartInfo } from './chart'
 import { getVerticalAlign } from './align'
 import { getPosition, getSize } from './position'
@@ -493,8 +493,10 @@ async function processGroupSpNode(node, warpObj, source, pws = 1, phs = 1) {
   const chcx = parseInt(xfrmNode['a:chExt']['attrs']['cx']) * RATIO_EMUs_Points
   const chcy = parseInt(xfrmNode['a:chExt']['attrs']['cy']) * RATIO_EMUs_Points
 
-  const isFlipV = getTextByPathList(xfrmNode, ['attrs', 'flipV']) === '1'
-  const isFlipH = getTextByPathList(xfrmNode, ['attrs', 'flipH']) === '1'
+  const flipV = getTextByPathList(xfrmNode, ['attrs', 'flipV'])
+  const flipH = getTextByPathList(xfrmNode, ['attrs', 'flipH'])
+  const isFlipV = flipV === '1' || flipV === 'true'
+  const isFlipH = flipH === '1' || flipH === 'true'
 
   let rotate = getTextByPathList(xfrmNode, ['attrs', 'rot']) || 0
   if (rotate) rotate = angleToDegrees(rotate)
@@ -538,7 +540,7 @@ async function processGroupSpNode(node, warpObj, source, pws = 1, phs = 1) {
 
 async function processSpNode(node, pNode, warpObj, source) {
   const name = getTextByPathList(node, ['p:nvSpPr', 'p:cNvPr', 'attrs', 'name'])
-  const idx = getTextByPathList(node, ['p:nvSpPr', 'p:nvPr', 'p:ph', 'attrs', 'idx'])
+    const idx = getTextByPathList(node, ['p:nvSpPr', 'p:nvPr', 'p:ph', 'attrs', 'idx'])
   let type = getTextByPathList(node, ['p:nvSpPr', 'p:nvPr', 'p:ph', 'attrs', 'type'])
   const order = getTextByPathList(node, ['attrs', 'order'])
 
@@ -561,7 +563,7 @@ async function processSpNode(node, pNode, warpObj, source) {
 
   if (!type) {
     const txBoxVal = getTextByPathList(node, ['p:nvSpPr', 'p:cNvSpPr', 'attrs', 'txBox'])
-    if (txBoxVal === '1') type = 'text'
+    if (txBoxVal === '1' || txBoxVal === 'true') type = 'text'
   }
   if (!type) type = getTextByPathList(slideLayoutSpNode, ['p:nvSpPr', 'p:nvPr', 'p:ph', 'attrs', 'type'])
   if (!type) type = getTextByPathList(slideMasterSpNode, ['p:nvSpPr', 'p:nvPr', 'p:ph', 'attrs', 'type'])
@@ -594,8 +596,10 @@ async function genShape(node, pNode, slideLayoutSpNode, slideMasterSpNode, name,
   const { top, left } = getPosition(slideXfrmNode, slideLayoutXfrmNode, slideMasterXfrmNode)
   const { width, height } = getSize(slideXfrmNode, slideLayoutXfrmNode, slideMasterXfrmNode)
 
-  const isFlipV = getTextByPathList(slideXfrmNode, ['attrs', 'flipV']) === '1'
-  const isFlipH = getTextByPathList(slideXfrmNode, ['attrs', 'flipH']) === '1'
+  const flipV = getTextByPathList(slideXfrmNode, ['attrs', 'flipV'])
+  const flipH = getTextByPathList(slideXfrmNode, ['attrs', 'flipH'])
+  const isFlipV = flipV === '1' || flipV === 'true'
+  const isFlipH = flipH === '1' || flipH === 'true'
 
   const rotate = angleToDegrees(getTextByPathList(slideXfrmNode, ['attrs', 'rot']))
 
@@ -700,8 +704,10 @@ async function processPicNode(node, warpObj, source) {
   const { width, height } = getSize(xfrmNode, undefined, undefined)
   const src = `data:${mimeType};base64,${base64ArrayBuffer(imgArrayBuffer)}`
 
-  const isFlipV = getTextByPathList(xfrmNode, ['attrs', 'flipV']) === '1'
-  const isFlipH = getTextByPathList(xfrmNode, ['attrs', 'flipH']) === '1'
+  const flipV = getTextByPathList(xfrmNode, ['attrs', 'flipV'])
+  const flipH = getTextByPathList(xfrmNode, ['attrs', 'flipH'])
+  const isFlipV = flipV === '1' || flipV === 'true'
+  const isFlipH = flipH === '1' || flipH === 'true'
 
   let rotate = 0
   const rotateNode = getTextByPathList(node, ['p:spPr', 'a:xfrm', 'attrs', 'rot'])
@@ -792,6 +798,34 @@ async function processPicNode(node, warpObj, source) {
 
   const { borderColor, borderWidth, borderType, strokeDasharray } = getBorder(node, undefined, warpObj)
 
+
+  const custShapType = getTextByPathList(node, ['p:spPr', 'a:custGeom'])
+
+  const shpFill = getTextByPathList(node, ['p:blipFill'])
+  const opacity = getPicFillOpacity(shpFill)
+
+  let clip = undefined
+  if (custShapType) {
+    const slideXfrmNode = getTextByPathList(node, ['p:spPr', 'a:xfrm'])
+
+    const ext = getTextByPathList(slideXfrmNode, ['a:ext', 'attrs'])
+    const shapType = getTextByPathList(node, ['p:spPr', 'a:prstGeom', 'attrs', 'prst'])
+    const w = parseInt(ext['cx']) * RATIO_EMUs_Points
+    const h = parseInt(ext['cy']) * RATIO_EMUs_Points
+    const path = getCustomShapePath(custShapType, w, h)
+    const { top, left } = getPosition(slideXfrmNode)
+
+    clip = {
+      type: 'shape',
+      shapType: shapType || 'custom', 
+      path,
+      width: w,
+      height: h,
+      left,
+      top,
+    }
+  }
+
   return {
     type: 'image',
     top,
@@ -804,7 +838,9 @@ async function processPicNode(node, warpObj, source) {
     isFlipH,
     order,
     rect,
+    clip,
     geom,
+    opacity,
     borderColor,
     borderWidth,
     borderType,

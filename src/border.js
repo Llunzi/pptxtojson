@@ -22,8 +22,9 @@ export function getBorder(node, elType, warpObj) {
     else if (elType !== 'obj') borderWidth = 0
     else borderWidth = 1
 
+    const schemeClr = getTextByPathList(lineNode, ['a:solidFill', 'a:schemeClr', 'attrs', 'val'])
     // 如果边框颜色不为空，则边框宽度为1
-    if (!isNoFill && borderColor) {
+    if (!isNoFill && (borderColor || schemeClr)) {
       borderWidth = 1
     }
   }

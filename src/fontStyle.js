@@ -91,19 +91,23 @@ export function getFontSize(node, slideLayoutSpNode, type, slideMasterTextStyles
 }
 
 export function getFontBold(node) {
-  return getTextByPathList(node, ['a:rPr', 'attrs', 'b']) === '1' ? 'bold' : ''
+  const bold = getTextByPathList(node, ['a:rPr', 'attrs', 'b'])
+  return bold === '1' || bold === 'true' ? 'bold' : ''
 }
 
 export function getFontItalic(node) {
-  return getTextByPathList(node, ['a:rPr', 'attrs', 'i']) === '1' ? 'italic' : ''
+  const italic = getTextByPathList(node, ['a:rPr', 'attrs', 'i'])
+  return italic === '1' || italic === 'true' ? 'italic' : ''
 }
 
 export function getFontDecoration(node) {
-  return getTextByPathList(node, ['a:rPr', 'attrs', 'u']) === 'sng' ? 'underline' : ''
+  const underline = getTextByPathList(node, ['a:rPr', 'attrs', 'u'])
+  return underline === 'sng' ? 'underline' : ''
 }
 
 export function getFontDecorationLine(node) {
-  return getTextByPathList(node, ['a:rPr', 'attrs', 'strike']) === 'sngStrike' ? 'line-through' : ''
+  const strike = getTextByPathList(node, ['a:rPr', 'attrs', 'strike'])
+  return strike === 'sngStrike' ? 'line-through' : ''
 }
 
 export function getFontSpace(node) {

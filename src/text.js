@@ -55,8 +55,11 @@ export function genTextBody(textBodyNode, spNode, slideLayoutSpNode, type, warpO
 
     const listType = getListType(pNode)
     if (listType) {
+      // listType 存在的时候， 列表的样式 列表元素中取
+      const _node = rNode?.[0] || pNode
+      const styleText = getTextStyle(_node, spNode, textBodyNode, pFontStyle, slideLayoutSpNode, type, warpObj)
       if (!isList) {
-        text += `<${listType}>`
+        text += `<${listType} style="${styleText}">`
         isList = listType
       }
       else if (isList && isList !== listType) {
@@ -98,7 +101,7 @@ export function getListType(node) {
   return ''
 }
 
-export function genSpanElement(node, pNode, textBodyNode, pFontStyle, slideLayoutSpNode, type, warpObj) {
+export function getTextStyle(node, pNode, textBodyNode, pFontStyle, slideLayoutSpNode, type, warpObj) {
   const lstStyle = textBodyNode['a:lstStyle']
   const slideMasterTextStyles = warpObj['slideMasterTextStyles']
 
@@ -135,6 +138,15 @@ export function genSpanElement(node, pNode, textBodyNode, pFontStyle, slideLayou
   if (subscript) styleText += `vertical-align: ${subscript};`
   if (shadow) styleText += `text-shadow: ${shadow};`
 
+  return styleText
+}
+
+export function genSpanElement(node, pNode, textBodyNode, pFontStyle, slideLayoutSpNode, type, warpObj) {
+  let text = node['a:t']
+  if (typeof text !== 'string') text = getTextByPathList(node, ['a:fld', 'a:t'])
+  if (typeof text !== 'string') text = '&nbsp;'
+
+  const styleText = getTextStyle(node, pNode, textBodyNode, pFontStyle, slideLayoutSpNode, type, warpObj)
   const linkID = getTextByPathList(node, ['a:rPr', 'a:hlinkClick', 'attrs', 'r:id'])
   if (linkID) {
     const linkURL = warpObj['slideResObj'][linkID]['target']

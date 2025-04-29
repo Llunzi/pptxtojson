@@ -35,7 +35,17 @@ export function getFillType(node) {
 
 export async function getPicFill(type, node, warpObj) {
   let img
-  const rId = node['a:blip']['attrs']['r:embed']
+  let rId = node['a:blip']['attrs']['r:embed']
+  
+  try {
+    // <asvg:svgBlip>是备用的SVG 图像引用, 但图片是位图，容易失真，此处若存在svg则优先使用
+    const svgRId = node['a:blip']['a:extLst']['a:ext']['asvg:svgBlip']['attrs']['r:embed']
+    rId = svgRId
+  } 
+  catch (error) {
+    // 没有svgRId
+  }
+
   let imgPath
   if (type === 'slideBg' || type === 'slide') {
     imgPath = getTextByPathList(warpObj, ['slideResObj', rId, 'target'])

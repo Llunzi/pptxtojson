@@ -69,14 +69,23 @@ export function getTextByPathList(node, path) {
 export function getLineHeight(node) {
   if (!node) return 1
 
-  const spcPctLineHeight = getTextByPathList(node, ['p:txBody', 'a:p', 'a:pPr', 'a:lnSpc', 'a:spcPct', 'attrs', 'val'])
+  const paragraph = getTextByPathList(node, ['p:txBody', 'a:p'])
+  if (!paragraph) return 1
+  let paragraphNode = undefined
+  if (paragraph.constructor === Array) {
+    paragraphNode = paragraph[0]
+  } 
+  else {
+    paragraphNode = paragraph 
+  }
+  const spcPctLineHeight = getTextByPathList(paragraphNode, ['a:pPr', 'a:lnSpc', 'a:spcPct', 'attrs', 'val'])
 
-  const spcPtsLineHeight = getTextByPathList(node, ['p:txBody', 'a:p', 'a:pPr', 'a:lnSpc', 'a:spcPts', 'attrs', 'val'])
+  const spcPtsLineHeight = getTextByPathList(paragraphNode, ['a:pPr', 'a:lnSpc', 'a:spcPts', 'attrs', 'val'])
 
   let _textLineHeightPt = undefined
   let _textLineHeightPercent = undefined
   if (spcPtsLineHeight) {
-    _textLineHeightPt = parseInt(spcPtsLineHeight) / 100 * 1.33 // 1.33 is the ratio of pt to px
+    _textLineHeightPt = parseInt(spcPtsLineHeight) / 100 //* 1.33 // 1.33 is the ratio of pt to px
   }
 
   if (spcPctLineHeight) {
@@ -88,7 +97,7 @@ export function getLineHeight(node) {
   } 
 
   if (_textLineHeightPt) {
-    return _textLineHeightPt + 'px'
+    return toFixed(_textLineHeightPt) + 'px'
   }
 
   return 1
