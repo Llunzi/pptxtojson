@@ -28,7 +28,6 @@
 	},
 	"dependencies": {
 		"jszip": "^3.10.1",
-		"test-pptxtojson": "link:../../../../Library/pnpm/global/5/node_modules/test-pptxtojson",
 		"tinycolor2": "1.6.0",
 		"txml": "^5.1.1"
 	},

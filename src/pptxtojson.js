@@ -540,7 +540,7 @@ async function processGroupSpNode(node, warpObj, source, pws = 1, phs = 1) {
 
 async function processSpNode(node, pNode, warpObj, source) {
   const name = getTextByPathList(node, ['p:nvSpPr', 'p:cNvPr', 'attrs', 'name'])
-    const idx = getTextByPathList(node, ['p:nvSpPr', 'p:nvPr', 'p:ph', 'attrs', 'idx'])
+  const idx = getTextByPathList(node, ['p:nvSpPr', 'p:nvPr', 'p:ph', 'attrs', 'idx'])
   let type = getTextByPathList(node, ['p:nvSpPr', 'p:nvPr', 'p:ph', 'attrs', 'type'])
   const order = getTextByPathList(node, ['attrs', 'order'])
 
