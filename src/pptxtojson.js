@@ -13,14 +13,15 @@ import { getTableBorders, getTableCellParams, getTableRowParams } from './table'
 import { RATIO_EMUs_Points } from './constants'
 import { findOMath, latexFormart, parseOMath } from './math'
 import { calculateFmla } from './fmla'
+import fntdata from './fntdata'
 
-export async function parse(file) {
+export async function parse(file, options = { font: false }) {
   const slides = []
   
   const zip = await JSZip.loadAsync(file)
 
   const filesInfo = await getContentTypes(zip)
-  const { width, height, defaultTextStyle } = await getSlideInfo(zip)
+  const { width, height, defaultTextStyle, fontLst } = await getSlideInfo(zip)
   const { themeContent, themeColors, themeColorsObj } = await getTheme(zip)
 
   for (const filename of filesInfo.slides) {
@@ -28,12 +29,17 @@ export async function parse(file) {
     slides.push(singleSlide)
   }
 
-  console.log('slides = ', slides)
+  let _fntdata = []
+  if (options.font) {
+    _fntdata = await fntdata(zip)
+  }
 
   return {
     slides,
     themeColors,
     themeColorsObj, 
+    fntdata: _fntdata, 
+    fontLst,
     size: {
       width,
       height,
@@ -77,10 +83,16 @@ async function getSlideInfo(zip) {
   const content = await readXmlFile(zip, 'ppt/presentation.xml')
   const sldSzAttrs = content['p:presentation']['p:sldSz']['attrs']
   const defaultTextStyle = content['p:presentation']['p:defaultTextStyle']
+  let embeddedFontLst = content['p:presentation']?.['p:embeddedFontLst']?.['p:embeddedFont'] || []
+  if (embeddedFontLst.constructor !== Array) embeddedFontLst = [embeddedFontLst]
+
+  const fontLst = embeddedFontLst.map(item => item?.['p:font']?.attrs?.typeface)
+
   return {
     width: parseInt(sldSzAttrs['cx']) * RATIO_EMUs_Points,
     height: parseInt(sldSzAttrs['cy']) * RATIO_EMUs_Points,
     defaultTextStyle,
+    fontLst,
   }
 }
 
