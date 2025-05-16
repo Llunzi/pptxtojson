@@ -500,10 +500,14 @@ async function processGroupSpNode(node, warpObj, source, pws = 1, phs = 1) {
   const y = parseInt(xfrmNode['a:off']['attrs']['y']) * RATIO_EMUs_Points
   const chx = parseInt(xfrmNode['a:chOff']['attrs']['x']) * RATIO_EMUs_Points
   const chy = parseInt(xfrmNode['a:chOff']['attrs']['y']) * RATIO_EMUs_Points
-  const cx = parseInt(xfrmNode['a:ext']['attrs']['cx']) * RATIO_EMUs_Points
-  const cy = parseInt(xfrmNode['a:ext']['attrs']['cy']) * RATIO_EMUs_Points
-  const chcx = parseInt(xfrmNode['a:chExt']['attrs']['cx']) * RATIO_EMUs_Points
-  const chcy = parseInt(xfrmNode['a:chExt']['attrs']['cy']) * RATIO_EMUs_Points
+  const _cx = parseInt(xfrmNode['a:ext']['attrs']['cx'])
+  const cx = _cx * RATIO_EMUs_Points
+  const _cy = parseInt(xfrmNode['a:ext']['attrs']['cy'])
+  const cy = _cy * RATIO_EMUs_Points
+  const _chcx = parseInt(xfrmNode['a:chExt']['attrs']['cx'])
+  // const chcx = _chcx * RATIO_EMUs_Points
+  const _chcy = parseInt(xfrmNode['a:chExt']['attrs']['cy'])
+  // const chcy = _chcy * RATIO_EMUs_Points
 
   const flipV = getTextByPathList(xfrmNode, ['attrs', 'flipV'])
   const flipH = getTextByPathList(xfrmNode, ['attrs', 'flipH'])
@@ -513,8 +517,8 @@ async function processGroupSpNode(node, warpObj, source, pws = 1, phs = 1) {
   let rotate = getTextByPathList(xfrmNode, ['attrs', 'rot']) || 0
   if (rotate) rotate = angleToDegrees(rotate)
 
-  const ws = cx / chcx * pws || 1 
-  const hs = cy / chcy * phs || 1
+  const ws = _cx / _chcx * pws || 1 
+  const hs = _cy / _chcy * phs || 1
 
   const elements = []
   for (const nodeKey in node) {
