@@ -14,6 +14,17 @@ import {
   getFontSubscript,
   getFontShadow,
 } from './fontStyle'
+import { RATIO_EMUs_Points } from './constants'
+
+export function getPadding(textBodyNode) {
+  const { tIns = 45720, bIns = 45720, lIns = 91440, rIns = 91440 } = textBodyNode['a:bodyPr']['attrs']
+  return {
+    top: (tIns * RATIO_EMUs_Points).toFixed(2),
+    bottom: (bIns * RATIO_EMUs_Points).toFixed(2),
+    left: (lIns * RATIO_EMUs_Points).toFixed(2),
+    right: (rIns * RATIO_EMUs_Points).toFixed(2),
+  }
+}
 
 export function genTextBody(textBodyNode, spNode, slideLayoutSpNode, type, warpObj) {
   if (!textBodyNode) return ''

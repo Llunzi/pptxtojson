@@ -5,7 +5,7 @@ import { getSlideBackgroundFill, getShapeFill, getSolidFill, getPicFill, getPicF
 import { getChartInfo } from './chart'
 import { getVerticalAlign } from './align'
 import { getPosition, getSize } from './position'
-import { genTextBody } from './text'
+import { genTextBody, getPadding } from './text'
 import { getCustomShapePath } from './shape'
 import { extractFileExtension, base64ArrayBuffer, getTextByPathList, angleToDegrees, getMimeType, isVideoLink, escapeHtml, hasValidText, getLineHeight } from './utils'
 import { getShadow } from './shadow'
@@ -628,7 +628,11 @@ async function genShape(node, pNode, slideLayoutSpNode, slideMasterSpNode, name,
   else txtRotate = rotate
 
   let content = ''
-  if (node['p:txBody']) content = genTextBody(node['p:txBody'], node, slideLayoutSpNode, type, warpObj)
+  let padding = ''
+  if (node['p:txBody']) {
+    content = genTextBody(node['p:txBody'], node, slideLayoutSpNode, type, warpObj)
+    padding = getPadding(node['p:txBody'])
+  }
 
   const { borderColor, borderWidth, borderType, strokeDasharray } = getBorder(node, type, warpObj)
   const fill = await getShapeFill(node, pNode, undefined, warpObj, source) || ''
@@ -696,6 +700,7 @@ async function genShape(node, pNode, slideLayoutSpNode, slideMasterSpNode, name,
     ...data,
     type: 'text',
     isVertical,
+    padding,
     rotate: txtRotate,
   }
 }
