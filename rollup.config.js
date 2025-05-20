@@ -6,6 +6,8 @@ import terser from '@rollup/plugin-terser'
 import globals from 'rollup-plugin-node-globals'
 import builtins from 'rollup-plugin-node-builtins'
 
+const isProd = process.env.NODE_ENV === 'production'
+
 const onwarn = warning => {
   if (warning.code === 'CIRCULAR_DEPENDENCY') return
 
@@ -20,12 +22,28 @@ export default {
       file: 'dist/index.umd.js',
       format: 'umd',
       name: 'pptxtojson',
-      sourcemap: true,
+      sourcemap: !isProd,
+      plugins: [
+        isProd && terser({
+          compress: {
+            drop_console: true,
+            drop_debugger: true
+          }
+        })
+      ].filter(Boolean)
     },
     {
       file: 'dist/index.js',
       format: 'es',
-      sourcemap: true,
+      sourcemap: !isProd,
+      plugins: [
+        isProd && terser({
+          compress: {
+            drop_console: true,
+            drop_debugger: true
+          }
+        })
+      ].filter(Boolean)
     },
   ],
   plugins: [
@@ -38,8 +56,8 @@ export default {
       babelHelpers: 'runtime',
       exclude: ['node_modules/**'],
     }),
-    terser(),
+    isProd && terser(),
     globals(),
     builtins(),
-  ]
+  ].filter(Boolean)
 }
