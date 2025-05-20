@@ -16,6 +16,8 @@ export function getBorder(node, elType, warpObj) {
   const isNoFill = getTextByPathList(lineNode, ['a:noFill'])
 
   let borderColor = getTextByPathList(lineNode, ['a:solidFill', 'a:srgbClr', 'attrs', 'val'])
+  const borderColorAlpha = getTextByPathList(lineNode, ['a:solidFill', 'a:srgbClr', 'a:alpha', 'attrs', 'val']) || '0'
+  const borderColorAlphaInt = parseInt(borderColorAlpha) / 100000 || 1
   let borderWidth = isNoFill ? 0 : (parseInt(getTextByPathList(lineNode, ['attrs', 'w'])) / 12700)
   if (isNaN(borderWidth)) {
     if (lineNode) borderWidth = 0
@@ -54,6 +56,16 @@ export function getBorder(node, elType, warpObj) {
 
   if (!borderColor) borderColor = '#000000'
   else borderColor = `#${borderColor}`
+
+  borderColor = tinycolor(borderColor).setAlpha(borderColorAlphaInt).toHex8String()
+
+  // <a:headEnd type="oval" w="sm" len="sm"/>
+  // <a:tailEnd type="none" w="sm" len="sm"/>
+
+  const headEnd = getTextByPathList(lineNode, ['a:headEnd', 'attrs', 'type'])
+  const tailEnd = getTextByPathList(lineNode, ['a:tailEnd', 'attrs', 'type'])
+
+  console.log(headEnd, tailEnd, 'headEnd, tailEnd')
 
   const type = getTextByPathList(lineNode, ['a:prstDash', 'attrs', 'val'])
   let borderType = 'solid'
@@ -107,5 +119,7 @@ export function getBorder(node, elType, warpObj) {
     borderWidth,
     borderType,
     strokeDasharray,
+    beginArrowType: headEnd,
+    endArrowType: tailEnd,
   }
 }

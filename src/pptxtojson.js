@@ -634,7 +634,7 @@ async function genShape(node, pNode, slideLayoutSpNode, slideMasterSpNode, name,
     padding = getPadding(node['p:txBody'])
   }
 
-  const { borderColor, borderWidth, borderType, strokeDasharray } = getBorder(node, type, warpObj)
+  const { borderColor, borderWidth, borderType, strokeDasharray, beginArrowType, endArrowType } = getBorder(node, type, warpObj)
   const fill = await getShapeFill(node, pNode, undefined, warpObj, source) || ''
 
   let shadow
@@ -670,6 +670,8 @@ async function genShape(node, pNode, slideLayoutSpNode, slideMasterSpNode, name,
     name,
     order,
     lineHeight,
+    beginArrowType,
+    endArrowType,
   }
 
   if (shadow) data.shadow = shadow
